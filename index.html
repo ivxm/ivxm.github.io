@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💖 Will You Be My Valentine?</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, #ff9a9e, #fad0c4);
+      color: #fff;
+      text-align: center;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.15);
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      color: #ff4d6d;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      margin: 0 10px;
+      transition: all 0.2s ease;
+    }
+
+    #yes {
+      background: #ff4d6d;
+      color: #fff;
+    }
+
+    #no {
+      background: #eee;
+      color: #000;
+      position: relative;
+    }
+
+    #no:hover {
+      transform: translate(
+        calc((Math.random() - 0.5) * 150px),
+        calc((Math.random() - 0.5) * 150px)
+      );
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #ff4d6d;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>💖 Will You Be My Valentine?</h1>
+    <p>Click the button below to see a special message!</p>
+    <div>
+      <button id="yes">Yes 💖</button>
+      <button id="no">No 🙈</button>
+    </div>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const yes = document.getElementById("yes");
+    const message = document.getElementById("message");
+
+    yes.onclick = () => {
+      message.textContent = "Yay! 💕 I knew it! Happy Valentine’s Day!";
+    }
+  </script>
+</body>
+</html>
