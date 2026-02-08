@@ -1,0 +1,69 @@
+body {
+  font-family: "Montserrat", sans-serif;
+  height:100vh;
+  width:100vw;
+  background: linear-gradient(135deg,#ff9a9e,#fad0c4);
+  overflow:hidden;
+  position:relative;
+}
+.centered {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2; /* above stickers */
+}
+
+h1 {
+  font-size: 8vw;
+  color: #ff4d6d;
+  margin-bottom: 2.5em; /* space for buttons */
+  pointer-events: none;
+}
+
+.buttons {
+  position: relative; /* relative to .centered */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+#yes {
+  position: relative; /* Yes stays fixed inside .buttons */
+}
+
+#no {
+  position: absolute; /* No moves freely */
+  top: 0;             /* aligned with Yes button vertically */
+  left: 110px;        /* start slightly to the right of Yes button */
+}
+
+button {
+  padding: 12px 25px;
+  font-size: 4vw;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #ff4d6d;
+  color: #fff;
+  transition: all 0.3s ease;
+  /* initial position for No button will be absolute */
+}
+
+
+#stickers-container {
+  position:absolute;
+  width:100%;
+  height:100%;
+  top:0;
+  left:0;
+  pointer-events:none;
+  z-index:1; /* behind buttons */
+}
+
+.sticker {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
