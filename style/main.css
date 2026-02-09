@@ -1,69 +1,145 @@
-body {
+/* ===== BODY / BACKGROUND ===== */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
   font-family: "Montserrat", sans-serif;
-  height:100vh;
-  width:100vw;
-  background: linear-gradient(135deg,#ff9a9e,#fad0c4);
-  overflow:hidden;
-  position:relative;
-}
-.centered {
-  text-align: center;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2; /* above stickers */
-}
-
-h1 {
-  font-size: 8vw;
-  color: #ff4d6d;
-  margin-bottom: 2.5em; /* space for buttons */
-  pointer-events: none;
-}
-
-.buttons {
-  position: relative; /* relative to .centered */
   display: flex;
   justify-content: center;
-  gap: 20px;
+  align-items: center;
+  overflow: hidden;
+  background-color: #fddcf9; /* main background */
 }
 
-#yes {
-  position: relative; /* Yes stays fixed inside .buttons */
+/* Full-screen repeating background behind phone */
+.background {
+  position: fixed;
+  inset: 0;
+  background-image: url('../assets/images/background.png');
+  background-repeat: repeat;
+  background-size: 33% auto;
+  background-position: top left;
+  z-index: 0;
+  background-color: rgba(253, 220, 249, 0.3); /* subtle overlay */
 }
 
-#no {
-  position: absolute; /* No moves freely */
-  top: 0;             /* aligned with Yes button vertically */
-  left: 110px;        /* start slightly to the right of Yes button */
+/* ===== PHONE CONTAINER ===== */
+.phone {
+  position: relative;
+  height: 95dvh; /* dynamic visible viewport height */
+  width: auto;
+  aspect-ratio: 430 / 932;
+
+  /* Gradient inspired by flowers */
+  background: linear-gradient(135deg, #fddcf9 0%, #ffd1ea 50%, #ffe0f0 100%);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+
+  /* Padding + safe area for notch / home bar */
+  padding-top: calc(25px + env(safe-area-inset-top));
+  padding-bottom: calc(25px + env(safe-area-inset-bottom));
+  padding-left: calc(25px + env(safe-area-inset-left));
+  padding-right: calc(25px + env(safe-area-inset-right));
+  box-sizing: border-box;
+
+  overflow: hidden;
+  z-index: 1;
+  border-radius: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
-button {
-  padding: 12px 25px;
-  font-size: 4vw;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  background: #ff4d6d;
-  color: #fff;
-  transition: all 0.3s ease;
-  /* initial position for No button will be absolute */
+/* Animate the gradient for soft motion */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-
+/* ===== STICKERS ===== */
 #stickers-container {
-  position:absolute;
-  width:100%;
-  height:100%;
-  top:0;
-  left:0;
-  pointer-events:none;
-  z-index:1; /* behind buttons */
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .sticker {
   position: absolute;
   pointer-events: none;
   z-index: 10;
+  transition: transform 0.3s ease;
+}
+
+/* ===== CENTERED CONTENT ===== */
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+  width: 90%;
+}
+
+/* ===== H1 TEXT ===== */
+/* ===== H1 TEXT ===== */
+h1 {
+  font-size: clamp(24px, 8%, 36px);
+  color: #e66ca8; /* lighter, happy pink */
+  background: linear-gradient(to bottom, #e66ca8, #f099c1); /* subtle vertical gradient */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2.5em;
+  pointer-events: none;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.15); /* softer shadow */
+}
+
+/* ===== BUTTONS ===== */
+#yes {
+  position: relative;
+  background: linear-gradient(135deg, #f28abf, #f4c0e0); /* lighter & cheerful */
+  color: #fff;
+}
+
+#no {
+  position: absolute;
+  top: 0;
+  background: linear-gradient(135deg, #b27cc9, #d4a0e0); /* softer dark purple */
+  color: #fff;
+}
+
+
+/* ===== BUTTON ROW ===== */
+.buttons {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+
+button {
+  padding: 12px 25px;
+  font-size: clamp(14px, 4vw, 18px);
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-family: "Montserrat", sans-serif;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Hover effects */
+button:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Active click effect */
+button:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }

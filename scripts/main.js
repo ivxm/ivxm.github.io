@@ -1,136 +1,227 @@
+const phone = document.querySelector(".phone") || document.body;
+
 const yesBtn = document.getElementById("yes");
 const noBtn = document.getElementById("no");
-
-const yesRect = yesBtn.getBoundingClientRect();
-const offsetParentRect = yesBtn.offsetParent.getBoundingClientRect();
-
-// start No button right next to Yes
-noBtn.style.position = "absolute";
-noBtn.style.left = (yesRect.right - offsetParentRect.left + 10) + "px"; // 10px gap
-noBtn.style.top = (yesRect.top - offsetParentRect.top) + "px";
-
 const stickersContainer = document.getElementById("stickers-container");
 
-// --- Stickers setup (same as before) ---
+/* ---------- INITIAL BUTTON PLACEMENT ---------- */
+function placeButtonsInitially() {
+  const centeredRect = document.querySelector(".centered").getBoundingClientRect();
+  const parentRect = yesBtn.offsetParent.getBoundingClientRect();
+
+  // Yes button on left
+  yesBtn.style.position = "absolute";
+  yesBtn.style.left = (centeredRect.left - parentRect.left + 10) + "px";
+  yesBtn.style.top = (centeredRect.bottom - parentRect.top + 10) + "px";
+
+  // No button on right
+  noBtn.style.position = "absolute";
+  noBtn.style.left = (centeredRect.right - parentRect.left - noBtn.offsetWidth - 10) + "px";
+  noBtn.style.top = (centeredRect.bottom - parentRect.top + 10) + "px";
+}
+
+placeButtonsInitially();
+
+
+
+/* ---------- STICKERS SETUP ---------- */
 const stickerLists = {
-  background: ["capy_ljuub.png","capy_maaz.gif","dii.png","gric.gif","guz_2.gif","guz_poziv.gif","kokos.png","miao.gif","pingvin.gif","znaas.png"],
+  background: [
+    "capy_ljuub.png","capy_maaz.gif","dii.png","gric.gif","guz_2.gif",
+    "guz_poziv.gif","kokos.png","miao.gif","pingvin.gif","znaas.png"
+  ],
   angry: ["kicanje.png"]
 };
 
 let happyIndex = 0;
 let occupiedPositions = [];
 
-// --- Safe zone ---
+/* ---------- SAFE ZONE ---------- */
 function getSafeZone() {
-  return document.querySelector(".centered").getBoundingClientRect();
+  const phoneRect = phone.getBoundingClientRect();
+  const rect = document.querySelector(".centered").getBoundingClientRect();
+  return {
+    left: rect.left - phoneRect.left,
+    top: rect.top - phoneRect.top,
+    right: rect.right - phoneRect.left,
+    bottom: rect.bottom - phoneRect.top
+  };
 }
 
-function isOverlapping(x, y, width, height, positions) {
-  for (let pos of positions) {
-    if (x < pos.x + pos.width && x + width > pos.x && y < pos.y + pos.height && y + height > pos.y) return true;
-  }
-  return false;
+function isOverlapping(x, y, w, h, list) {
+  return list.some(p =>
+    x < p.x + p.width &&
+    x + w > p.x &&
+    y < p.y + p.height &&
+    y + h > p.y
+  );
 }
 
-function getRandomNonOverlappingPosition(elementWidth, elementHeight) {
+/* ---------- RANDOM POSITION (PHONE-BOUND) ---------- */
+function getRandomNonOverlappingPosition(w, h) {
+  const phoneRect = phone.getBoundingClientRect();
   const safe = getSafeZone();
-  const margin = 20;
-  let x, y, attempts = 0;
+  const margin = 10; // spacing from edges
+
+  let x, y, tries = 0;
+
   do {
-    x = margin + Math.random() * (window.innerWidth - elementWidth - 2 * margin);
-    y = margin + Math.random() * (window.innerHeight - elementHeight - 2 * margin);
-    attempts++;
-    if (attempts > 200) break;
-  } while ((x + elementWidth > safe.left - 10 && x < safe.right + 10 && y + elementHeight > safe.top - 10 && y < safe.bottom + 10)
-           || isOverlapping(x, y, elementWidth, elementHeight, occupiedPositions));
+    x = margin + Math.random() * (phoneRect.width - w - 2 * margin);
+    y = margin + Math.random() * (phoneRect.height - h - 2 * margin);
+    tries++;
+    if (tries > 200) break;
+  } while (
+    (x + w > safe.left && x < safe.right && y + h > safe.top && y < safe.bottom) || // avoid center
+    isOverlapping(x, y, w, h, occupiedPositions)
+  );
+
+  // clamp to phone container
+  x = Math.max(margin, Math.min(x, phoneRect.width - w - margin));
+  y = Math.max(margin, Math.min(y, phoneRect.height - h - margin));
+
   return { x, y };
 }
 
-function createSticker(name, folder="background", x=null, y=null, maxSizeVW=15, duration=10000) {
+/* ---------- CREATE STICKER ---------- */
+function createSticker(name, folder="background", x=null, y=null, maxSizePct=25, duration=5000) {
   const img = document.createElement("img");
   img.src = `assets/stickers/${folder}/${name}`;
   img.classList.add("sticker");
 
-  const size = 5 + Math.random() * maxSizeVW;
-  img.style.width = size + "vw";
-  img.style.height = size + "vw";
+  const phoneRect = phone.getBoundingClientRect();
+  const sizePct = 10 + Math.random() * maxSizePct;
+  const sizePx = phoneRect.width * (sizePct / 100);
 
-  const pos = (x!==null && y!==null)
-    ? {x, y}
-    : getRandomNonOverlappingPosition(window.innerWidth * (size/100), window.innerWidth * (size/100));
+  img.style.width = sizePx + "px";
+  img.style.height = sizePx + "px";
+
+  const pos = (x !== null && y !== null)
+    ? {
+        x: Math.max(0, Math.min(x, phoneRect.width - sizePx)),
+        y: Math.max(0, Math.min(y, phoneRect.height - sizePx))
+      }
+    : getRandomNonOverlappingPosition(sizePx, sizePx);
 
   img.style.left = pos.x + "px";
   img.style.top = pos.y + "px";
 
   stickersContainer.appendChild(img);
-  occupiedPositions.push({ x: pos.x, y: pos.y, width: img.offsetWidth, height: img.offsetHeight });
+
+  requestAnimationFrame(() => {
+    occupiedPositions.push({
+      x: pos.x,
+      y: pos.y,
+      width: img.offsetWidth,
+      height: img.offsetHeight
+    });
+  });
 
   setTimeout(() => {
     img.remove();
-    occupiedPositions = occupiedPositions.filter(p => p !== pos);
+    occupiedPositions = occupiedPositions.filter(p => p.x !== pos.x || p.y !== pos.y);
   }, duration);
-
-  return img;
 }
 
-// --- Round-robin background stickers ---
+/* ---------- BACKGROUND STICKERS ---------- */
 setInterval(() => {
   const bg = stickerLists.background;
   if (!bg.length) return;
   createSticker(bg[happyIndex], "background");
   happyIndex = (happyIndex + 1) % bg.length;
-}, 2500);
+}, 1000);
 
-// --- No button movement ---
+/* ---------- SAFE ZONES FOR NO BUTTON ---------- */
+function getPhoneRelativeRect(el) {
+  const phoneRect = phone.getBoundingClientRect();
+  const rect = el.getBoundingClientRect();
+  return {
+    left: rect.left - phoneRect.left,
+    top: rect.top - phoneRect.top,
+    right: rect.right - phoneRect.left,
+    bottom: rect.bottom - phoneRect.top,
+    width: rect.width,
+    height: rect.height
+  };
+}
+
 function getSafeZones() {
-  const hRect = document.querySelector("h1").getBoundingClientRect();
-  const yRect = yesBtn.getBoundingClientRect();
+  const margin = 10; // extra padding around safe zones
+  const hRect = getPhoneRelativeRect(document.querySelector("h1"));
+  const yRect = getPhoneRelativeRect(yesBtn);
+
   return [
-    { left: hRect.left, top: hRect.top, right: hRect.right, bottom: hRect.bottom },
-    { left: yRect.left, top: yRect.top, right: yRect.right, bottom: yRect.bottom }
+    {
+      left: hRect.left - margin,
+      top: hRect.top - margin,
+      right: hRect.right + margin,
+      bottom: hRect.bottom + margin
+    },
+    {
+      left: yRect.left - margin,
+      top: yRect.top - margin,
+      right: yRect.right + margin,
+      bottom: yRect.bottom + margin
+    }
   ];
 }
 
-function isOverlappingSafeZone(x, y, width, height, zones) {
-  for (let zone of zones) {
-    if (x < zone.right && x + width > zone.left && y < zone.bottom && y + height > zone.top) return true;
-  }
-  return false;
+function overlapsSafeZone(x, y, w, h, zones) {
+  return zones.some(z =>
+    x < z.right && x + w > z.left &&
+    y < z.bottom && y + h > z.top
+  );
 }
 
 noBtn.addEventListener("click", () => {
-  const angryStickers = stickerLists.angry;
-  if (!angryStickers.length) return;
+  const phoneRect = phone.getBoundingClientRect();
+  const btnRect = getPhoneRelativeRect(noBtn);
+  const btnW = btnRect.width;
+  const btnH = btnRect.height;
 
-  const btnRect = noBtn.getBoundingClientRect();
-  const btnWidth = btnRect.width;
-  const btnHeight = btnRect.height;
+  // Angry sticker at current position
+  createSticker(
+    "kicanje.png",
+    "angry",
+    btnRect.left,
+    btnRect.top,
+    15,
+    2000
+  );
 
-  // place angry sticker
-  const containerRect = stickersContainer.getBoundingClientRect();
-  createSticker(angryStickers[0], "angry", btnRect.left - containerRect.left, btnRect.top - containerRect.top, 15, 2000);
-
-  const maxDeltaX = window.innerWidth * 0.25;
-  const maxDeltaY = window.innerHeight * 0.2;
-  const margin = 10;
   const zones = getSafeZones();
+  const margin = 10;
 
-  let newX, newY;
+  let x, y;
   let tries = 0;
-  do {
-    newX = margin + Math.random() * (window.innerWidth - btnWidth - 2 * margin);
-    newY = margin + Math.random() * (window.innerHeight - btnHeight - 2 * margin);
-    tries++;
-    if (tries > 10) break;
-  } while (isOverlappingSafeZone(newX, newY, btnWidth, btnHeight, zones));
 
-  noBtn.style.position = "absolute";
-  const offsetParentRect = noBtn.offsetParent.getBoundingClientRect();
-  noBtn.style.left = newX - offsetParentRect.left + "px";
-  noBtn.style.top = newY - offsetParentRect.top + "px";
+  do {
+    x = margin + Math.random() * (phoneRect.width - btnW - 2 * margin);
+    y = margin + Math.random() * (phoneRect.height - btnH - 2 * margin);
+    tries++;
+    if (tries > 100) break;
+  } while (overlapsSafeZone(x, y, btnW, btnH, zones));
+
+  // FINAL: adjust for offsetParent so it stays inside phone container
+  const parentRect = noBtn.offsetParent.getBoundingClientRect();
+  const left = x + phoneRect.left - parentRect.left;
+  const top = y + phoneRect.top - parentRect.top;
+
+  noBtn.style.left = left + "px";
+  noBtn.style.top = top + "px";
 });
 
-// --- Yes button click: go to another page ---
+
+/* ---------- YES BUTTON ---------- */
 yesBtn.addEventListener("click", () => {
-  window.location.href = "yes.html"; // or whatever page exists in your repo
+  window.location.href = "yes.html";
+});
+
+/* ---------- RESIZE SAFETY ---------- */
+window.addEventListener("resize", () => {
+  occupiedPositions = [];
+  placeButtonsInitially();
+
+  // remove all current stickers to prevent overflow
+  const allStickers = stickersContainer.querySelectorAll(".sticker");
+  allStickers.forEach(sticker => sticker.remove());
 });
