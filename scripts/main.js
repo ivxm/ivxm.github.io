@@ -83,7 +83,7 @@ function getRandomNonOverlappingPosition(w, h) {
 }
 
 /* ---------- CREATE STICKER ---------- */
-function createSticker(name, folder="background", x=null, y=null, maxSizePct=25, duration=5000) {
+function createSticker(name, folder="background", x=null, y=null, maxSizePct=25, duration=10000) {
   const img = document.createElement("img");
   img.src = `assets/stickers/${folder}/${name}`;
   img.classList.add("sticker");
@@ -128,7 +128,7 @@ setInterval(() => {
   if (!bg.length) return;
   createSticker(bg[happyIndex], "background");
   happyIndex = (happyIndex + 1) % bg.length;
-}, 1000);
+}, 2000);
 
 /* ---------- SAFE ZONES FOR NO BUTTON ---------- */
 function getPhoneRelativeRect(el) {
